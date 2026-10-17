@@ -36,10 +36,13 @@ MAXCHARS="${STANDUP_MAX_CHARS:-200}"   # raise it to read a drafted message in f
 
 command -v jq >/dev/null || { echo "ERROR: jq is required" >&2; exit 2; }
 
+# A missing transcript directory is an empty source, not a failure: someone who
+# only wants the git side, or who keeps transcripts elsewhere, still gets a
+# stand-up. Saying so is the whole point; stopping here would not be.
 if [ ! -d "$PROJ" ]; then
-  echo "ERROR: transcript directory not found: $PROJ" >&2
-  echo "Set STANDUP_PROJECTS if your agent stores sessions elsewhere." >&2
-  exit 2
+  echo "(no transcript directory at $PROJ)"
+  echo "WARNING: empty source. Set STANDUP_PROJECTS if your agent keeps its sessions elsewhere."
+  exit 0
 fi
 
 echo "# Your prompts in Claude Code sessions, $(date -d "$FROM" '+%d/%m %H:%M') to $(date -d "@$until_ts" '+%d/%m %H:%M')"

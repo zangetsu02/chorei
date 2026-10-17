@@ -28,7 +28,12 @@ if [ -z "$BASE" ]; then
   exit 3
 fi
 
-command -v secret-tool >/dev/null || { echo "JIRA: secret-tool not installed; skipping."; exit 3; }
+for tool in curl jq secret-tool; do
+  command -v "$tool" >/dev/null || {
+    echo "JIRA: $tool is not installed, skipping the ticket step."
+    exit 3
+  }
+done
 
 PASS=$(secret-tool lookup service "$SERVICE" username "$USERNAME" 2>/dev/null)
 if [ -z "$PASS" ]; then
