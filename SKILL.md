@@ -49,8 +49,10 @@ Put the window on the **first line** of the output.
 
 ## Step 1 - Collect, in this order
 
+The three scripts live next to this file, in the skill's own directory.
+
 ```bash
-cd <this skill's directory>
+cd "$(dirname "<path to this SKILL.md>")"
 ./sessions.sh "<start>" "<end>"   # what THEY wrote: the most faithful source
 ./collect.sh "<start>" "<end>"    # git: checkouts, commits, WIP, unpushed, ticket keys
 ./tickets-jira.sh <KEYS>          # optional: ticket status and titles

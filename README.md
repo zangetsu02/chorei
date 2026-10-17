@@ -1,18 +1,23 @@
-# konkyo 根拠
+# chorei 朝礼
 
-**The grounds for what you say.** A stand-up assembler that gathers the evidence of your
-day — your git work, your coding-agent sessions, your tickets — so that every line you
-say to your team survives one question: *how do you know?*
+*Chōrei* is the morning assembly a Japanese workplace opens the day with. This one
+assembles the evidence of yours — your git work, your coding-agent sessions, your
+tickets — so that every line you say to your team survives one question:
+*how do you know?*
 
 Everything runs on your machine. Nothing is uploaded, no API key is needed, and the
 collectors make no network calls at all except the optional Jira one.
 
-## It does not write your stand-up
+## Not another commit summarizer
 
-Tools that generate a paragraph from your commits exist, and nobody reads them aloud.
-`konkyo` does the opposite: it puts the **evidence** in front of you, grouped by thread,
-each item carrying its source. The summary is yours to say, in your own words, in the
-ninety seconds you have.
+[`git-standup`](https://github.com/nilbuild/git-standup) shows you what you **committed**.
+`chorei` shows you everything your commits don't: the reviews, the analysis, the calls,
+the message you drafted but have not sent, the work still uncommitted on a branch.
+
+And it does not write your stand-up for you. Tools that generate a paragraph from your
+commits exist, and nobody reads them aloud. `chorei` does the opposite: it puts the
+**evidence** in front of you, grouped by thread, each item carrying its source. The
+summary is yours to say, in your own words, in the ninety seconds you have.
 
 What it refuses to do is the point:
 
@@ -36,11 +41,12 @@ All three are read-only. `collect.sh` never fetches, pulls or checks anything ou
 As a Claude Code skill:
 
 ```sh
-git clone https://github.com/<you>/konkyo ~/.claude/skills/konkyo
+git clone https://github.com/<you>/chorei ~/.claude/skills/standup
 ```
 
-Then say *"I have standup soon"* and the skill runs. Or call the scripts directly —
-they are plain bash and print to stdout.
+The repository is `chorei`; the skill it installs is called `standup`, because that is
+the word you will type. Then just say *"I have standup soon"* and it runs — or call the
+scripts directly, they are plain bash and print to stdout.
 
 Requires `bash`, `git`, `jq`, and `curl` only if you use Jira.
 
@@ -69,7 +75,7 @@ secret-tool store --label='Standup Jira' service standup-jira username <you>
 ```
 
 On Jira Cloud use an API token as the password. On Jira Server a burst of failed logins
-trips the CAPTCHA on your account, so a 401 is terminal here: `konkyo` never retries.
+trips the CAPTCHA on your account, so a 401 is terminal here: `chorei` never retries.
 
 ## The output
 
