@@ -94,10 +94,15 @@ Prose is where this kind of tool usually goes soft, so the caps move rather than
   whole paragraph.
 - **Four threads, 120 words, no exceptions.** That is about forty-five seconds, which
   leaves room for the today and the blockers they say themselves.
-- **Name the thing, then what happened to it.** "Liste speciali: conflitti risolti e
-  allineato a develop" beats "Ho lavorato su liste speciali, dove c'erano dei conflitti".
-- **No linking waffle.** No "inoltre", "per quanto riguarda", "come anticipato". A
-  stand-up is a list spoken out loud, not an essay.
+- **First person, past tense, and the verb carries the outcome.** They are saying this
+  about themselves: "I released six services to staging", not "Release to staging of six
+  services". A telegraphic noun phrase reads like a ticket title and sounds wrong out loud.
+- **Ban the empty verbs.** "I worked on", "I dealt with", "I handled", "I followed up on"
+  say nothing and eat the budget. The verb has to be the thing that happened: released,
+  fixed, merged, pushed, drafted, renamed. If no such verb exists, the thread probably
+  does not deserve a sentence.
+- **No linking waffle.** No "besides", "regarding", "as mentioned". A stand-up is a list
+  spoken out loud, not an essay.
 - **The ticket key goes inline**, where it is said: `SNRC-1487 passa a READY TO QA`.
 
 **If there are more than four threads**, the priority order is: (1) what produced
