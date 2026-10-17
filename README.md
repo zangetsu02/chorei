@@ -2,6 +2,10 @@
   <img src="assets/banner.png" alt="chorei: what you did yesterday, with its sources" width="760">
 </p>
 
+<p align="center">
+  <a href="https://skills.sh/zangetsu02/chorei"><img alt="skills.sh" src="https://skills.sh/b/zangetsu02/chorei?style=for-the-badge" height="28"></a>
+</p>
+
 # chorei 朝礼
 
 *Chōrei* is the morning assembly a Japanese workplace opens the day with. This one
@@ -41,6 +45,12 @@ All three are read-only. `collect.sh` never fetches, pulls or checks anything ou
 ## Install
 
 As a Claude Code skill:
+
+```sh
+npx skills add zangetsu02/chorei
+```
+
+or, to clone it yourself:
 
 ```sh
 git clone https://github.com/zangetsu02/chorei ~/.claude/skills/standup
