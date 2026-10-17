@@ -60,6 +60,8 @@ places and takes the git author from `git config user.email`.
 | `STANDUP_WS` | first existing of `~/Workspaces`, `~/workspace`, `~/code`, `~/src`, `~/projects`, `~/dev` | where your repositories live, colon-separated for several roots |
 | `STANDUP_GIT_AUTHOR` | `git config user.email` | which commits are yours |
 | `STANDUP_TICKET_PREFIX` | *(off)* | ticket prefixes, e.g. `PROJ` or `PROJ\|OPS` |
+| `STANDUP_WRITE` | `ask` | write the stand-up to a file: `ask`, `yes` or `no` |
+| `STANDUP_COMMIT` | `ask` | if `STANDUP_DIR` is a git repository, commit and push it: `ask`, `yes` or `no` |
 | `STANDUP_DIR` | `~/standup` | where the stand-up files are written |
 | `STANDUP_PROJECTS` | `~/.claude/projects` | where your agent keeps its transcripts |
 | `STANDUP_MAX_LINES` | `60` | prompts shown before truncating |
@@ -90,6 +92,14 @@ Window: 2026-10-16 00:00 → 2026-10-17 00:00
 ```
 
 Sections 1-5 stay under 180 words, because ninety seconds is ninety seconds.
+
+By default nothing is written anywhere: you are asked once, and nothing is ever
+committed or pushed unless you say so. If you keep your stand-ups in a git repository
+and want that automatic, set `STANDUP_WRITE=yes` and `STANDUP_COMMIT=yes`.
+
+Keeping the files is worth something: `To check` carries your open commitments from one
+stand-up to the next, and it is read from yesterday's file. With `STANDUP_WRITE=no` that
+section is always empty.
 
 ## Licence
 

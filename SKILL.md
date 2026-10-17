@@ -38,9 +38,10 @@ not change**: it is the same day. Update the file, do not open a new window.
 commitments left open. It does not decide the window and is not a source of facts,
 apart from the ticket keys it was the one to name.
 
-`$STANDUP_DIR` defaults to `$HOME/standup`. If it is a git repository, pull before
-reading, so `To check` starts from the last stand-up actually written, including from
-another machine.
+`$STANDUP_DIR` defaults to `$HOME/standup`. If it is a git repository, `pull --ff-only`
+before reading, so `To check` starts from the last stand-up actually written, including
+from another machine. If that pull fails, carry on with what is on disk and say so: it
+is a read, and nothing here is worth stopping a stand-up for.
 
 Pass start and end to the scripts in exactly this format: **`"YYYY-MM-DD HH:MM"`**. It
 is the only one `git --since/--until` and `date -d` read the same way.
@@ -149,20 +150,43 @@ the `Window:` line excluded). Cutting is your job, not theirs.
 `Today` and `Blockers` are the two sections the data does **not** contain. Present the
 draft, ask for confirmation or correction, and **only then** write the file.
 
-If the user is unreachable: hand over the draft, mark `Today` with `(unconfirmed)` and
-**write the file anyway**, telling them you did. The file is their notebook, not a
-publication: not writing it breaks the chain of windows in Step 0, and tomorrow today's
-work would surface again as new.
+If the user is unreachable: hand over the draft and mark `Today` with `(unconfirmed)`.
+Whether the file is written then depends on Step 5: with `STANDUP_WRITE=yes` write it
+and say you did, with `ask` do **not** - you cannot ask someone who is not there, and
+silence is not a yes. Say instead that the file was not written and that tomorrow's
+window will have to be widened by hand, because the chain in Step 0 is broken without it.
 
-## Step 5 - Write the file
+## Step 5 - Write the file, if you are allowed to
 
-`$STANDUP_DIR/YYYY-MM-DD.md`, dated with **the day you will say the stand-up**, not the
-day you prepare it: the evening of the 8th for the 9th's meeting is `2026-09-09.md`.
-Create the directory if missing; if the file exists, **update it** (never two files for
-one stand-up). Do not drop the `Window:` line: it is what makes tomorrow's window right.
+Two settings decide this, and **both default to `ask`**. A tool that writes files and
+pushes to someone's repository the first time they run it has not earned that yet.
 
-## Step 6 - If the directory is a git repository, commit and push
+| Variable | Values | Default |
+|---|---|---|
+| `STANDUP_WRITE` | `ask` / `yes` / `no` | `ask` |
+| `STANDUP_COMMIT` | `ask` / `yes` / `no` | `ask` |
+
+- `ask` - show the draft, then ask once. The answer holds for this stand-up, not forever.
+- `yes` - write without asking. What someone sets once they trust it.
+- `no` - never write. The stand-up is delivered in the conversation and that is all.
+
+With `STANDUP_WRITE=no`, say plainly what is lost: `To check` can never carry anything
+forward, because it is read from the previous file. Say it once, not every day.
+
+When you do write: `$STANDUP_DIR/YYYY-MM-DD.md`, dated with **the day the stand-up will
+be said**, not the day it is prepared - the evening of the 8th for the 9th's meeting is
+`2026-09-09.md`. Create the directory if missing; if the file exists, **update it**
+(never two files for one stand-up). Do not drop the `Window:` line: it is what makes
+tomorrow's window right.
+
+## Step 6 - Commit and push, if you are allowed to
+
+Only when the file was written, `$STANDUP_DIR` is a git repository, and `STANDUP_COMMIT`
+is not `no`. Nothing here creates a repository or adds a remote.
 
 A stand-up left only on disk is not saved: tomorrow Step 0 may start from a file the
-other machines do not have, and the window slides back without anyone noticing. If the
-push fails, **tell the user** with the error: it is not a detail to swallow in silence.
+other machines do not have, and the window slides back without anyone noticing. That is
+the reason to turn this on - not a reason to turn it on for someone.
+
+If the push fails, **tell the user** with the error: it is not a detail to swallow in
+silence.
