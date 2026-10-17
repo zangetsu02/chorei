@@ -20,7 +20,12 @@ nor an instant to resume from: it is **a date on the calendar**.
    - before 12:00 → the stand-up is **this morning** → stand-up day = **today**
    - from 12:00 on → the stand-up is **tomorrow morning** → stand-up day = **tomorrow**
 2. **If that day is a Saturday or a Sunday, there is no stand-up.** Move it to the
-   following Monday. This is the one place where the clock is not enough.
+   following Monday.
+
+**The clock only picks the candidate day. Steps 2 and 3 then override it**, and they
+win. A Friday-afternoon run, a Saturday run and a Sunday run all report **Friday**. Read
+the afternoon paragraph below as describing a working day, because on a weekend it has
+already been overruled.
 3. **The window is the last working day before the stand-up day**, `00:00` to `00:00`.
    Stand-up on Thursday 2026-10-08 → window `2026-10-07 00:00 → 2026-10-08 00:00`.
    Stand-up on Monday → the window is **Friday**, not Sunday: see below.
@@ -45,12 +50,10 @@ exists than the first time, which is the point.
 named in it. Nothing else in it is evidence: it does not decide the window, and a claim
 that appears only there was written by you, not observed.
 
-`STANDUP_DIR` is an environment variable with no default inside the scripts, so set one
-before you use it:
-
-```bash
-: "${STANDUP_DIR:=$HOME/standup}"
-```
+`STANDUP_DIR`, `STANDUP_WRITE` and `STANDUP_COMMIT` are read by **you**, not by any
+script. Nothing enforces them; they are settings for the person following these
+instructions. `STANDUP_DIR` has no default anywhere, so export one in Step 1 before you
+use it.
 
 If that directory is a git repository, `pull --ff-only` before reading, so `To check`
 starts from the last stand-up actually written, including from another machine. If the
@@ -64,19 +67,30 @@ Put the window on the **first line** of the output.
 
 ## Step 1 - Collect, in this order
 
-The three scripts live in the same directory as this file. Run them from there.
-
-**Before the first run, set the ticket prefix**, or no ticket key will ever be found:
+The three scripts live in the same directory as this file. Your working directory may
+reset between commands, so resolve that directory once, keep it in a variable, and call
+the scripts through it rather than relying on a `cd` that may not survive:
 
 ```bash
-: "${STANDUP_TICKET_PREFIX:=PROJ}"   # the user's own prefix, e.g. SNRC; several: "PROJ|OPS"
-: "${STANDUP_DIR:=$HOME/standup}"
+SKILL_DIR=<the directory this SKILL.md was loaded from>   # e.g. ~/.claude/skills/standup
 ```
 
+**Before the first run, export the ticket prefix**, or no ticket key will ever be
+found. `export` matters: the scripts are child processes, and a plain shell variable
+never reaches them. The `: "${VAR:=value}"` form belongs in the config file, which the
+scripts source, and nowhere else.
+
 ```bash
-./sessions.sh "<start>" "<end>"          # what THEY wrote: the most faithful source
-./collect.sh  "<start>" "<end>"          # git: commits, dated WIP, unpushed, ticket keys
-./tickets-jira.sh PROJ-1 PROJ-2 ...      # optional: ticket status and titles, keys space separated
+export STANDUP_TICKET_PREFIX="${STANDUP_TICKET_PREFIX:-PROJ}"  # theirs, e.g. SNRC; several: "PROJ|OPS"
+export STANDUP_DIR="${STANDUP_DIR:-$HOME/standup}"
+```
+
+Ask them for the prefix if you cannot see it in their branch names.
+
+```bash
+"$SKILL_DIR/sessions.sh" "<start>" "<end>"   # what THEY wrote: the most faithful source
+"$SKILL_DIR/collect.sh"  "<start>" "<end>"   # git: commits, dated WIP, unpushed, ticket keys
+"$SKILL_DIR/tickets-jira.sh" PROJ-1 PROJ-2   # optional: keys space separated, run it even with none
 cat "$(ls -t "$STANDUP_DIR"/*.md 2>/dev/null | head -1)" 2>/dev/null \
   || echo "(no previous stand-up)"
 ```
@@ -91,9 +105,13 @@ the window. What is under **`## parked, nothing inside the window`** did not, an
 belongs in the stand-up: a branch sitting on a ticket name is where the repository was
 left, not work, and uncommitted files carry the date they were last touched.
 
-`tickets-jira.sh` exits `3` when Jira was never configured. That is a normal state, not
-a failure: say nothing about it. Exits `4` and `5` mean it was configured and broke;
-those go in Provenance.
+**Run `tickets-jira.sh` even when `collect.sh` found no keys.** With no arguments it
+asks a different question, "what of mine moved in the last two days", and the answer is
+what Step 2's rule about dropping Jira tickets is written for.
+
+It exits `3` when Jira was never configured, prints that on stderr, and prints nothing
+on stdout. That is a normal state, not a failure: say nothing about it. Exits `4` and
+`5` mean it was configured and broke; those go in Provenance.
 
 ## Step 2 - The output is this, in this order, and nothing else
 
@@ -106,9 +124,10 @@ those go in Provenance.
    and from this window. On the first run the previous file does not exist: write that,
    do not leave the section mute
 4. `## Provenance` — one line per claim: the source (commit / their 09:36 sentence /
-   Jira), plus notes about the tools (e.g. "tickets-jira.sh exited 3: statuses not
-   verified") and the threads dropped. **Not** read to the team: it exists so they can
-   defend every sentence.
+   Jira), plus notes about the tools when one of them actually broke (e.g.
+   "tickets-jira.sh exited 4: Jira refused the login, statuses not verified"), and
+   the threads dropped. **Not** read to the team: it exists so they can defend every
+   sentence.
 
 **What this does not do.** It does not say what they will do today, and it does not list
 their blockers. Nothing in the data knows either: today is a decision, and a blocker is
@@ -127,8 +146,10 @@ Prose is where this kind of tool usually goes soft, so the caps move rather than
 - **Four threads, 120 words, no exceptions.** That is about forty-five seconds, which
   leaves room for the today and the blockers they say themselves.
 - **First person, past tense, and the verb carries the outcome.** They are saying this
-  about themselves: "I released six services to staging", not "Release to staging of six
-  services". A telegraphic noun phrase reads like a ticket title and sounds wrong out loud.
+  about themselves: "I released billing, search and invoicing to staging", not "Release
+  to staging of three services". A telegraphic noun phrase reads like a ticket title and
+  sounds wrong out loud. Name the things rather than count them: a count is a number you
+  worked out, and Step 3 does not allow those.
 - **Ban the empty verbs.** "I worked on", "I dealt with", "I handled", "I followed up on"
   say nothing and eat the budget. The verb has to be the thing that happened: released,
   fixed, merged, pushed, drafted, renamed. If no such verb exists, the thread probably
@@ -143,8 +164,8 @@ commits or was delivered to someone, (2) what is waiting on an answer from other
 
 **Which key counts:** the one *they* name — and the previous stand-up counts as their
 word, not as second-hand. Commits land on whatever branch was open at the time, which
-may carry another job's key: if branch and account disagree, write theirs and note the
-branch in Provenance.
+may carry another job's key: when the branch name carries a different key from the one
+they named, write theirs and note the branch in Provenance.
 
 **What to drop from Jira:** the tickets the script adds because they are assigned and
 recently moved count only if a local source ties them to the window.
@@ -153,6 +174,10 @@ recently moved count only if a local source ties them to the window.
 language whoever started this session happens to be using. They will say this out loud
 to their own team; a stand-up translated into English is one they have to translate
 back while the meeting waits.
+
+**The three headings stay in English**, exactly as written above: tomorrow's run reads
+`To check` out of today's file, and a translated heading quietly breaks that.
+Everything under them is in their language.
 
 Cutting is your job, not theirs.
 
@@ -170,12 +195,13 @@ Cutting is your job, not theirs.
 - **Workstation work stays out** (VMs, VPN, drivers, IDE, and the tools they build for
   themselves), unless it stopped the work: then it is one clause inside the thread it
   stopped. Something that got in the way and was solved is not worth a word.
-- **If this rule empties the whole window, do not report an empty day.** It happens on
-  the first run more often than not, because that window usually contains them
-  installing and setting up this very tool. Write one sentence saying where the day
-  went and that it was outside the team's work, list the threads in Provenance, and let
-  them decide: a tool built for other people may well be work their team wants to hear
-  about, and that call is theirs, not yours.
+- **When this rule drops a thread that produced commits, say so and let them decide.**
+  A tool built for other people may well be work their team wants to hear about, and
+  that call is theirs. Name the dropped threads in Provenance, always. If the rule
+  empties the window entirely, which is what the first run looks like for most people
+  because that window contains them installing this very tool, do not report an empty
+  day: write one sentence saying where the day went and that it fell outside the team's
+  work.
 - **An empty source is declared.** "No commits yesterday" is a legitimate sentence to
   say at a stand-up. Filling the void with context is the worst thing you can do here.
 

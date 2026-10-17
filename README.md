@@ -83,9 +83,9 @@ that somewhere else. If it is not there, nothing happens and the defaults apply.
 | `STANDUP_WS` | first existing of `~/Workspaces`, `~/workspace`, `~/code`, `~/src`, `~/projects`, `~/dev` | where your repositories live, colon-separated for several roots |
 | `STANDUP_GIT_AUTHOR` | `git config user.email` | which commits are yours |
 | `STANDUP_TICKET_PREFIX` | *(off)* | ticket prefixes, e.g. `PROJ` or `PROJ\|OPS` |
-| `STANDUP_WRITE` | `ask` | write the stand-up to a file: `ask`, `yes` or `no` |
-| `STANDUP_COMMIT` | `ask` | if `STANDUP_DIR` is a git repository, commit and push it: `ask`, `yes` or `no` |
-| `STANDUP_DIR` | `~/standup` | where the stand-up files are written |
+| `STANDUP_WRITE` | `ask` | write the stand-up to a file: `ask`, `yes` or `no` (agent) |
+| `STANDUP_COMMIT` | `ask` | if `STANDUP_DIR` is a git repository, commit and push it: `ask`, `yes` or `no` (agent) |
+| `STANDUP_DIR` | `~/standup` | where the stand-up files are written (agent) |
 | `STANDUP_PROJECTS` | `~/.claude/projects` | where your agent keeps its transcripts |
 | `STANDUP_MAX_LINES` | `60` | prompts shown before truncating |
 | `STANDUP_MAX_CHARS` | `200` | characters per prompt; raise it to read a draft in full |
