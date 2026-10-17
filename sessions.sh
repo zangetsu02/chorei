@@ -15,14 +15,24 @@ CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}
 # shellcheck disable=SC1090
 [ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
 
+# GNU date and stat. BSD versions take different flags, so on macOS this uses
+# the coreutils ones if they are installed and says so plainly if they are not.
+# Untested on macOS: it fails with a cure rather than guessing at BSD syntax.
+DATE=date; command -v gdate >/dev/null 2>&1 && DATE=gdate
+STAT=stat; command -v gstat >/dev/null 2>&1 && STAT=gstat
+if ! "$DATE" -d @0 >/dev/null 2>&1; then
+  echo "ERROR: GNU date is required. On macOS: brew install coreutils" >&2
+  exit 2
+fi
+
 FROM="${1:-yesterday 00:00}"
-if ! cutoff=$(date -d "$FROM" +%s 2>/dev/null); then
+if ! cutoff=$("$DATE" -d "$FROM" +%s 2>/dev/null); then
   echo "ERROR: cannot parse date: $FROM" >&2
   exit 2
 fi
 TO="${2:-}"
 if [ -n "$TO" ]; then
-  if ! until_ts=$(date -d "$TO" +%s 2>/dev/null); then
+  if ! until_ts=$("$DATE" -d "$TO" +%s 2>/dev/null); then
     echo "ERROR: cannot parse date: $TO" >&2
     exit 2
   fi
@@ -45,7 +55,7 @@ if [ ! -d "$PROJ" ]; then
   exit 0
 fi
 
-echo "# Your prompts in Claude Code sessions, $(date -d "$FROM" '+%d/%m %H:%M') to $(date -d "@$until_ts" '+%d/%m %H:%M')"
+echo "# Your prompts in Claude Code sessions, $("$DATE" -d "$FROM" '+%d/%m %H:%M') to $("$DATE" -d "@$until_ts" '+%d/%m %H:%M')"
 echo "# (your messages only, truncated; times are local)"
 echo
 
@@ -55,7 +65,7 @@ tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
 # written in natural language. The mtime filter is done with stat instead.
 for f in "$PROJ"/*/*.jsonl; do
   [ -f "$f" ] || continue
-  m=$(stat -c %Y "$f" 2>/dev/null) || continue
+  m=$("$STAT" -c %Y "$f" 2>/dev/null) || continue
   [ "$m" -lt "$cutoff" ] && continue
 
   jq -r --argjson cutoff "$cutoff" --argjson until "$until_ts" --argjson maxchars "$MAXCHARS" '

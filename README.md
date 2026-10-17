@@ -52,6 +52,10 @@ the scripts directly: they are plain bash and print to stdout.
 
 Requires `bash`, `git`, `jq`, and `curl` only if you use Jira.
 
+Built and tested on Linux. It needs GNU `date` and `stat`; on macOS install them with
+`brew install coreutils` and the scripts will find `gdate` and `gstat` on their own.
+Without them they stop on the first line and say so.
+
 ## Configure
 
 Nothing is mandatory. Without configuration it finds your repositories in the usual

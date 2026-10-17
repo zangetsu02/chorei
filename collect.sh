@@ -14,6 +14,16 @@ CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}
 # shellcheck disable=SC1090
 [ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
 
+# GNU date and stat. BSD versions take different flags, so on macOS this uses
+# the coreutils ones if they are installed and says so plainly if they are not.
+# Untested on macOS: it fails with a cure rather than guessing at BSD syntax.
+DATE=date; command -v gdate >/dev/null 2>&1 && DATE=gdate
+STAT=stat; command -v gstat >/dev/null 2>&1 && STAT=gstat
+if ! "$DATE" -d @0 >/dev/null 2>&1; then
+  echo "ERROR: GNU date is required. On macOS: brew install coreutils" >&2
+  exit 2
+fi
+
 # Workspace roots, colon-separated. Without configuration, the first of the usual
 # suspects that exists is used, so the tool works before it is configured.
 if [ -n "${STANDUP_WS:-}" ]; then
@@ -43,7 +53,7 @@ PREFIX="${STANDUP_TICKET_PREFIX:-}"
 SINCE="${1:-yesterday 00:00}"
 UNTIL="${2:-}"   # exclusive when given: the window the caller asked for
 
-if ! SINCE_TS=$(date -d "$SINCE" +%s 2>/dev/null); then
+if ! SINCE_TS=$("$DATE" -d "$SINCE" +%s 2>/dev/null); then
   echo "ERROR: cannot parse date: $SINCE" >&2
   exit 2
 fi
@@ -116,10 +126,10 @@ for repo in "${CHECKOUTS[@]}"; do
       path=${entry:3}
       path=${path##* -> }          # renames print "old -> new"
       path=${path%\"}; path=${path#\"}
-      ts=$(stat -c %Y "$repo/$path" 2>/dev/null) || continue
+      ts=$("$STAT" -c %Y "$repo/$path" 2>/dev/null) || continue
       [ "$ts" -gt "$wip_newest" ] && wip_newest=$ts
     done <<< "$status"
-    [ "$wip_newest" -gt 0 ] && wip_newest_h=$(date -d "@$wip_newest" '+%d/%m %H:%M')
+    [ "$wip_newest" -gt 0 ] && wip_newest_h=$("$DATE" -d "@$wip_newest" '+%d/%m %H:%M')
   fi
   wip_in_window=0
   [ "$wip_newest" -ge "$SINCE_TS" ] && wip_in_window=1
