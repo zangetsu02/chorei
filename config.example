@@ -12,12 +12,17 @@
 # Which commits are yours. Defaults to git's user.email.
 # : "${STANDUP_GIT_AUTHOR:=you@example.com}"
 
-# Ticket prefixes, several separated by a pipe. Unset means no ticket keys.
+# Ticket prefixes, several separated by a pipe. Unset means no ticket keys at all,
+# so set this first: without it collect.sh finds none and never says which ones
+# it was looking for.
 # : "${STANDUP_TICKET_PREFIX:=PROJ}"
 # : "${STANDUP_TICKET_PREFIX:=PROJ|OPS}"
 
 # Writing the stand-up to a file, and committing it if that directory is a git
 # repository. Each one takes ask, yes or no. Both default to ask.
+#
+# These two are read by the agent running the skill, not by the scripts: nothing
+# here can enforce them. Every other variable in this file is read by a script.
 # : "${STANDUP_WRITE:=yes}"
 # : "${STANDUP_COMMIT:=yes}"
 # : "${STANDUP_DIR:=$HOME/notes/standup}"

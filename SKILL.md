@@ -11,37 +11,51 @@ thing said to colleagues.
 
 You assemble evidence. You do not write a speech.
 
-## Step 0 - The window is the day before the stand-up. Always.
+## Step 0 - The window is the last day the user worked. Always.
 
-A stand-up tells **the full day preceding it**, from `00:00` to `00:00`. It is not a
-chain to follow, nor an instant to resume from: it is **a date on the calendar**, and
-it is computed in two lines.
+A stand-up tells **one full day**, from `00:00` to `00:00`. It is not a chain to follow,
+nor an instant to resume from: it is **a date on the calendar**.
 
-1. **Which day is the stand-up?** The current time decides:
-   - before 12:00 → the stand-up is **this morning** → day = **today**
-   - from 12:00 on → the stand-up is **tomorrow morning** → day = **tomorrow**
-2. **The window is `<stand-up day − 1> 00:00 → <stand-up day> 00:00`.**
+1. **Which day is the next stand-up?** The current time decides:
+   - before 12:00 → the stand-up is **this morning** → stand-up day = **today**
+   - from 12:00 on → the stand-up is **tomorrow morning** → stand-up day = **tomorrow**
+2. **If that day is a Saturday or a Sunday, there is no stand-up.** Move it to the
+   following Monday. This is the one place where the clock is not enough.
+3. **The window is the last working day before the stand-up day**, `00:00` to `00:00`.
    Stand-up on Thursday 2026-10-08 → window `2026-10-07 00:00 → 2026-10-08 00:00`.
-   This morning's work **does not count**: you will tell it tomorrow.
-3. **Do not ask.** The rule above is deterministic and has no ambiguous case. If the
-   user wants it different, they will correct it in one sentence.
+   Stand-up on Monday → the window is **Friday**, not Sunday: see below.
 
-**Monday.** The day before is Sunday, almost always empty. Do not widen to Friday on
-your own: collect Sunday, and if it is empty **say so** — then, if Friday was never
-told (no stand-up file for Saturday), **ask** whether to widen. Widening without asking
-is the classic way to tell the same things twice.
+**The window always ends in the past.** Never pass an end in the future, and never let
+it run to "now". An afternoon run prepares *tomorrow's* stand-up, so the window is
+**today**, which is still open: collect it anyway, say in Provenance that the window
+ends at midnight and the day is not finished, and expect to re-run.
 
-**Re-running for the same stand-up.** If today's file already exists the window **does
-not change**: it is the same day. Update the file, do not open a new window.
+A morning run prepares *this morning's* stand-up, so the window is **yesterday**, and
+this morning's work does not belong in it. You will tell that tomorrow.
 
-**The previous stand-up file is still read**, but **only** for `To check` — its own
-commitments left open. It does not decide the window and is not a source of facts,
-apart from the ticket keys it was the one to name.
+**Monday.** The last working day is Friday, and Saturday and Sunday are almost always
+empty. Collect **Friday** `00:00 → Saturday 00:00`. If a stand-up file already exists
+for a day after Friday, Friday has been told: **ask** before telling it again.
 
-`$STANDUP_DIR` defaults to `$HOME/standup`. If it is a git repository, `pull --ff-only`
-before reading, so `To check` starts from the last stand-up actually written, including
-from another machine. If that pull fails, carry on with what is on disk and say so: it
-is a read, and nothing here is worth stopping a stand-up for.
+**Re-running for the same stand-up.** The window does **not** change: it is the same
+day. Update the file, do not open a new window. On an afternoon re-run more of the day
+exists than the first time, which is the point.
+
+**The previous stand-up file** is read for `To check` and for the ticket keys the user
+named in it. Nothing else in it is evidence: it does not decide the window, and a claim
+that appears only there was written by you, not observed.
+
+`STANDUP_DIR` is an environment variable with no default inside the scripts, so set one
+before you use it:
+
+```bash
+: "${STANDUP_DIR:=$HOME/standup}"
+```
+
+If that directory is a git repository, `pull --ff-only` before reading, so `To check`
+starts from the last stand-up actually written, including from another machine. If the
+pull fails, carry on with what is on disk and say so: it is a read, and nothing here is
+worth stopping a stand-up for.
 
 Pass start and end to the scripts in exactly this format: **`"YYYY-MM-DD HH:MM"`**. It
 is the only one `git --since/--until` and `date -d` read the same way.
@@ -50,20 +64,36 @@ Put the window on the **first line** of the output.
 
 ## Step 1 - Collect, in this order
 
-The three scripts live next to this file, in the skill's own directory.
+The three scripts live in the same directory as this file. Run them from there.
+
+**Before the first run, set the ticket prefix**, or no ticket key will ever be found:
 
 ```bash
-cd "$(dirname "<path to this SKILL.md>")"
-./sessions.sh "<start>" "<end>"   # what THEY wrote: the most faithful source
-./collect.sh "<start>" "<end>"    # git: checkouts, commits, WIP, unpushed, ticket keys
-./tickets-jira.sh <KEYS>          # optional: ticket status and titles
-cat "$(ls -t "$STANDUP_DIR"/*.md 2>/dev/null | head -1)"   # ONLY the most recent one
+: "${STANDUP_TICKET_PREFIX:=PROJ}"   # the user's own prefix, e.g. SNRC; several: "PROJ|OPS"
+: "${STANDUP_DIR:=$HOME/standup}"
+```
+
+```bash
+./sessions.sh "<start>" "<end>"          # what THEY wrote: the most faithful source
+./collect.sh  "<start>" "<end>"          # git: commits, dated WIP, unpushed, ticket keys
+./tickets-jira.sh PROJ-1 PROJ-2 ...      # optional: ticket status and titles, keys space separated
+cat "$(ls -t "$STANDUP_DIR"/*.md 2>/dev/null | head -1)" 2>/dev/null \
+  || echo "(no previous stand-up)"
 ```
 
 `sessions.sh` goes first: reviews, analysis and calls leave no commits. It truncates at
-200 characters; to read a drafted message in full before saying "prepared", re-run it
-with `STANDUP_MAX_CHARS=800`. If `tickets-jira.sh` exits non-zero, **continue without
-tickets** and note it.
+200 characters and marks what it cut as `[...+N chars]`. **Any line carrying that mark
+may be hiding a drafted message**, so before you write "prepared" anywhere, re-run it
+with `STANDUP_MAX_CHARS=800` and read those lines whole.
+
+`collect.sh` prints two groups. What is under the repository headings happened inside
+the window. What is under **`## parked, nothing inside the window`** did not, and never
+belongs in the stand-up: a branch sitting on a ticket name is where the repository was
+left, not work, and uncommitted files carry the date they were last touched.
+
+`tickets-jira.sh` exits `3` when Jira was never configured. That is a normal state, not
+a failure: say nothing about it. Exits `4` and `5` mean it was configured and broke;
+those go in Provenance.
 
 ## Step 2 - The output is this, in this order, and nothing else
 
@@ -91,7 +121,9 @@ Prose is where this kind of tool usually goes soft, so the caps move rather than
 
 - **One sentence per thread.** If a thread has commits, uncommitted work and a drafted
   message, it stays one sentence: join them. Three sentences about one topic eat the
-  whole paragraph.
+  whole paragraph. Join only what `collect.sh` put inside the window: uncommitted work
+  it dated before the window, or listed as parked, is not part of the day and joining
+  it would date it by association.
 - **Four threads, 120 words, no exceptions.** That is about forty-five seconds, which
   leaves room for the today and the blockers they say themselves.
 - **First person, past tense, and the verb carries the outcome.** They are saying this
@@ -117,9 +149,10 @@ branch in Provenance.
 **What to drop from Jira:** the tickets the script adds because they are assigned and
 recently moved count only if a local source ties them to the window.
 
-**Write in the language the user speaks to you in.** They will say this out loud to
-their own team; a stand-up translated into English is one they have to translate back
-while the meeting waits.
+**Write in the language of their own prompts**, as `sessions.sh` prints them, not the
+language whoever started this session happens to be using. They will say this out loud
+to their own team; a stand-up translated into English is one they have to translate
+back while the meeting waits.
 
 Cutting is your job, not theirs.
 
@@ -137,6 +170,12 @@ Cutting is your job, not theirs.
 - **Workstation work stays out** (VMs, VPN, drivers, IDE, and the tools they build for
   themselves), unless it stopped the work: then it is one clause inside the thread it
   stopped. Something that got in the way and was solved is not worth a word.
+- **If this rule empties the whole window, do not report an empty day.** It happens on
+  the first run more often than not, because that window usually contains them
+  installing and setting up this very tool. Write one sentence saying where the day
+  went and that it was outside the team's work, list the threads in Provenance, and let
+  them decide: a tool built for other people may well be work their team wants to hear
+  about, and that call is theirs, not yours.
 - **An empty source is declared.** "No commits yesterday" is a legitimate sentence to
   say at a stand-up. Filling the void with context is the worst thing you can do here.
 
@@ -149,9 +188,10 @@ Cutting is your job, not theirs.
 | "It is implicit that they think so" | If they did not write it, it does not exist. |
 | "Git is empty, I will fill with context" | An empty source is declared, not compensated for. |
 | "Better too much, they can cut" | 900 words do not fit in 90 seconds. You cut. |
-| "The window is ambiguous, I will ask" | Step 0 is a date on the calendar. There is nothing to ask. |
-| "I will resume where the last one ended" | **No.** The window is the day before, always. |
-| "I will add this morning too, it is fresh" | This morning is told tomorrow. In or out, there is no "almost". |
+| "The window is ambiguous, I will ask" | Step 0 is a date on the calendar. The only thing it asks about is widening past Friday. |
+| "I will resume where the last one ended" | **No.** The window is the last working day, recomputed every time. |
+| "It is afternoon, so I will stop at now" | The window ends at midnight. Say the day is still open; do not shorten it. |
+| "It is morning, I will add this morning too" | A morning run tells yesterday. This morning is told tomorrow. |
 
 ### Red flags - stop and verify
 
