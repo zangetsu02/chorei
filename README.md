@@ -43,7 +43,7 @@ All three are read-only. `collect.sh` never fetches, pulls or checks anything ou
 As a Claude Code skill:
 
 ```sh
-git clone https://github.com/<you>/chorei ~/.claude/skills/standup
+git clone https://github.com/zangetsu02/chorei ~/.claude/skills/standup
 ```
 
 The repository is `chorei`; the skill it installs is called `standup`, because that is
@@ -75,7 +75,7 @@ places and takes the git author from `git config user.email`.
 The Jira password lives in the system keyring, never in a file or an argument:
 
 ```sh
-secret-tool store --label='Standup Jira' service standup-jira username <you>
+secret-tool store --label='Standup Jira' service standup-jira username <your-jira-username>
 ```
 
 On Jira Cloud use an API token as the password. On Jira Server a burst of failed logins
