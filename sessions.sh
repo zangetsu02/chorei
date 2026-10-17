@@ -1,23 +1,19 @@
 #!/usr/bin/env bash
-# Extracts WHAT YOU WROTE from your Claude Code transcripts, inside a time window.
-# It is the first-person account of your day, and the most faithful source for
-# "what did I do", because git only shows what was committed.
+# Extracts what YOU wrote from your Claude Code transcripts, inside a time window.
+# Git only shows what was committed; reviews, analysis and calls live here.
 # READ-ONLY. No network. It never prints the assistant's replies: those are Claude's
-# guesses, not your facts, and mixing the two is how a standup becomes fiction.
+# guesses, not your facts, and mixing the two is how a stand-up becomes fiction.
 # Usage: sessions.sh "<start>" ["<end>"]    default start: "yesterday 00:00"
 # The end is optional and exclusive; without it the window runs to "now".
 set -uo pipefail
 
-# Optional config file, so these settings do not have to live in your shell
-# profile. Assign inside it with `: "${VAR:=value}"`, so a variable you set for
-# a single run still wins over the file.
+# Optional config file. See config.example for the form it uses.
 CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}"
 # shellcheck disable=SC1090
 [ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
 
-# GNU date and stat. BSD versions take different flags, so on macOS this uses
-# the coreutils ones if they are installed and says so plainly if they are not.
-# Untested on macOS: it fails with a cure rather than guessing at BSD syntax.
+# shortcut: GNU date and stat only, BSD flags differ. Upgrade when someone
+# needs macOS without coreutils.
 DATE=date; command -v gdate >/dev/null 2>&1 && DATE=gdate
 STAT=stat; command -v gstat >/dev/null 2>&1 && STAT=gstat
 if ! "$DATE" -d @0 >/dev/null 2>&1; then
@@ -81,8 +77,8 @@ for f in "$PROJ"/*/*.jsonl; do
     # What is left is what you typed.
     | select($c | test("system-reminder|<command-name>|tool_use_id|Caveat:|\\[Request interrupted|<local-command-|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|^\\[Image #") | not)
     | ($c | gsub("\\s+";" ")) as $clean
-    # Two path segments, not one: a bare basename turns $HOME into "palladinic"
-    # and collapses every worktree of a repository onto the same label.
+    # Two path segments, not one: a bare basename labels work in $HOME with the
+    # account name, and collapses every worktree of a repo onto the same label.
     | ((.cwd // "?") | split("/") | if length > 1 then .[-2:] | join("/") else .[-1] end) as $where
     | [$ep, ($ep|strflocaltime("%d/%m %H:%M")), $where, ($clean|.[0:$maxchars]), (($clean|length) - $maxchars)]
     | @tsv' "$f" 2>/dev/null >> "$tmp"

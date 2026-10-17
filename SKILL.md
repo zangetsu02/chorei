@@ -81,7 +81,7 @@ never reaches them. The `: "${VAR:=value}"` form belongs in the config file, whi
 scripts source, and nowhere else.
 
 ```bash
-export STANDUP_TICKET_PREFIX="${STANDUP_TICKET_PREFIX:-PROJ}"  # theirs, e.g. SNRC; several: "PROJ|OPS"
+export STANDUP_TICKET_PREFIX="${STANDUP_TICKET_PREFIX:-PROJ}"  # theirs; several: "PROJ|OPS"
 export STANDUP_DIR="${STANDUP_DIR:-$HOME/standup}"
 ```
 

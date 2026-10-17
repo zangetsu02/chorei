@@ -10,9 +10,7 @@
 # this script NEVER retries: a 401 is terminal.
 set -uo pipefail
 
-# Optional config file, so these settings do not have to live in your shell
-# profile. Assign inside it with `: "${VAR:=value}"`, so a variable you set for
-# a single run still wins over the file.
+# Optional config file. See config.example for the form it uses.
 CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}"
 # shellcheck disable=SC1090
 [ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"

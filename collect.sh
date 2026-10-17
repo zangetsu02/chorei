@@ -7,16 +7,13 @@
 # The end is optional; without it the window runs to "now".
 set -uo pipefail
 
-# Optional config file, so these settings do not have to live in your shell
-# profile. Assign inside it with `: "${VAR:=value}"`, so a variable you set for
-# a single run still wins over the file.
+# Optional config file. See config.example for the form it uses.
 CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}"
 # shellcheck disable=SC1090
 [ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
 
-# GNU date and stat. BSD versions take different flags, so on macOS this uses
-# the coreutils ones if they are installed and says so plainly if they are not.
-# Untested on macOS: it fails with a cure rather than guessing at BSD syntax.
+# shortcut: GNU date and stat only, BSD flags differ. Upgrade when someone
+# needs macOS without coreutils.
 DATE=date; command -v gdate >/dev/null 2>&1 && DATE=gdate
 STAT=stat; command -v gstat >/dev/null 2>&1 && STAT=gstat
 if ! "$DATE" -d @0 >/dev/null 2>&1; then
@@ -112,8 +109,8 @@ for repo in "${CHECKOUTS[@]}"; do
   fi
 
   # Uncommitted work carries no date of its own, so it gets one here. Without it
-  # a file last touched in September prints under a heading that announces a
-  # window, and the stand-up inherits a claim nobody checked.
+  # a file last touched weeks ago prints under a heading announcing a window, and
+  # the stand-up inherits a claim nobody checked.
   status=$(git -C "$repo" status --porcelain 2>/dev/null)
   dirty=$(printf '%s' "$status" | grep -cv '^??' || true)
   untracked=$(printf '%s' "$status" | grep -c '^??' || true)
@@ -146,10 +143,10 @@ for repo in "${CHECKOUTS[@]}"; do
   names_ticket=0
   [ -n "$PREFIX" ] && names_ticket=$(printf '%s' "$branch" | grep -ciE "(${PREFIX})[ _-]?[0-9]{1,6}")
 
-  # Activity means something happened inside the window: a commit, work in
-  # progress touched inside it, or something still unpushed. A branch parked on a
-  # ticket name since September is not activity, and neither is a file last
-  # edited weeks ago; both go to the parked list instead of into the stand-up.
+  # Activity means something happened inside the window: a commit, or work in
+  # progress touched inside it. A branch left on a ticket name, an old edit and an
+  # unpushed branch from last month are not the day being told: they go to the
+  # parked list, which says so, instead of into the stand-up.
   if [ -n "$commits" ] || [ "$wip_in_window" -eq 1 ]; then
     active=$((active+1))
     echo "## $name  [on branch: $branch]"
