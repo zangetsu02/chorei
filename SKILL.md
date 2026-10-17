@@ -99,6 +99,10 @@ branch in Provenance.
 recently moved count only if a local source ties them to the window, or if they are
 blocked (→ blocker).
 
+**Write in the language the user speaks to you in.** They will say this out loud to
+their own team; a stand-up translated into English is one they have to translate back
+while the meeting waits.
+
 Every bullet: **one line, max ~25 words**, plain language, no needless jargon.
 Sections 1-5 stay **under 180 words**, counting **only the bullet text** (headings and
 the `Window:` line excluded). Cutting is your job, not theirs.

@@ -78,9 +78,11 @@ for repo in "${CHECKOUTS[@]}"; do
     # --source + %S: every commit carries the ref it is reachable from. Without it,
     # with worktrees the commits landed under the wrong checkout's branch.
     until_arg=(); [ -n "$UNTIL" ] && until_arg=(--until="$UNTIL")
+    # %cd, not %ad: --since/--until filter the commit date, so showing the author
+    # date makes a rebased commit look like it landed days before the window.
     commits=$(git -C "$repo" log --all --source --author="$AUTHOR" --since="$SINCE" \
                "${until_arg[@]}" \
-               --format='  commit %ad [%S] %s' --date=format:'%d/%m %H:%M' 2>/dev/null \
+               --format='  commit %cd [%S] %s' --date=format:'%d/%m %H:%M' 2>/dev/null \
                | sed 's#refs/heads/##; s#refs/remotes/##' | sort -u)
   fi
 
