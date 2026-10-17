@@ -1,0 +1,37 @@
+<!-- Source for assets/banner.png. Re-render with:
+     rsvg-convert -w 1060 assets/banner.svg -o assets/banner.png -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="272" viewBox="0 0 1060 272">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c0f1e"/>
+      <stop offset="58%"  stop-color="#151b32"/>
+      <stop offset="100%" stop-color="#241f33"/>
+    </linearGradient>
+    <radialGradient id="dawn" cx="50%" cy="100%" r="70%">
+      <stop offset="0%"   stop-color="#f0ad73" stop-opacity="0.55"/>
+      <stop offset="40%"  stop-color="#d07f55" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#d07f55" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1060" y2="0">
+      <stop offset="0%"   stop-color="#f0ad73" stop-opacity="0"/>
+      <stop offset="35%"  stop-color="#f0ad73" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#f0ad73" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1060" height="272" fill="url(#sky)"/>
+  <ellipse cx="530" cy="272" rx="560" ry="150" fill="url(#dawn)"/>
+  <line x1="0" y1="240" x2="1060" y2="240" stroke="url(#rule)" stroke-width="1.2"/>
+
+  <text x="74" y="172" font-family="Noto Sans CJK JP, Noto Sans JP, sans-serif"
+        font-size="118" font-weight="300" fill="#f5f2ec" letter-spacing="5">朝礼</text>
+
+  <line x1="360" y1="66" x2="360" y2="190" stroke="#f5f2ec" stroke-opacity="0.16" stroke-width="1"/>
+
+  <text x="412" y="112" font-family="DejaVu Sans Mono, Menlo, monospace"
+        font-size="44" fill="#f5f2ec" letter-spacing="2">chorei</text>
+  <text x="414" y="158" font-family="DejaVu Sans Mono, Menlo, monospace"
+        font-size="23" fill="#f0ad73">what you did yesterday, with its sources</text>
+  <text x="414" y="192" font-family="DejaVu Sans, Helvetica, sans-serif"
+        font-size="18" fill="#99a1b7">git, agent sessions and tickets</text>
+</svg>

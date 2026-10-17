@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="chorei: what you did yesterday, with its sources" width="760">
+</p>
+
 # chorei 朝礼
 
 *Chōrei* is the morning assembly a Japanese workplace opens the day with. This one
