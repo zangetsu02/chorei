@@ -8,6 +8,13 @@
 # The end is optional and exclusive; without it the window runs to "now".
 set -uo pipefail
 
+# Optional config file, so these settings do not have to live in your shell
+# profile. Assign inside it with `: "${VAR:=value}"`, so a variable you set for
+# a single run still wins over the file.
+CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}"
+# shellcheck disable=SC1090
+[ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
+
 FROM="${1:-yesterday 00:00}"
 if ! cutoff=$(date -d "$FROM" +%s 2>/dev/null); then
   echo "ERROR: cannot parse date: $FROM" >&2

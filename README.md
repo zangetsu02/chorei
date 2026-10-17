@@ -57,6 +57,27 @@ Requires `bash`, `git`, `jq`, and `curl` only if you use Jira.
 Nothing is mandatory. Without configuration it finds your repositories in the usual
 places and takes the git author from `git config user.email`.
 
+When you do want to change something, the settings are environment variables, and there
+are two places to put them.
+
+For anything you want every day, copy the example config and edit it:
+
+```sh
+mkdir -p ~/.config/chorei
+cp config.example ~/.config/chorei/config
+```
+
+Every line in it is commented out and written as `: "${VAR:=value}"`, which assigns only
+if the variable is not already set. That is what lets the second place work: a variable
+you set for a single run wins over the file.
+
+```sh
+STANDUP_MAX_CHARS=800 ./sessions.sh "2026-10-16 00:00" "2026-10-17 00:00"
+```
+
+The file is read from `~/.config/chorei/config`, or from `$CHOREI_CONFIG` if you point
+that somewhere else. If it is not there, nothing happens and the defaults apply.
+
 | Variable | Default | What it is |
 |---|---|---|
 | `STANDUP_WS` | first existing of `~/Workspaces`, `~/workspace`, `~/code`, `~/src`, `~/projects`, `~/dev` | where your repositories live, colon-separated for several roots |

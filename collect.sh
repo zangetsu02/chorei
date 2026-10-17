@@ -7,6 +7,13 @@
 # The end is optional; without it the window runs to "now".
 set -uo pipefail
 
+# Optional config file, so these settings do not have to live in your shell
+# profile. Assign inside it with `: "${VAR:=value}"`, so a variable you set for
+# a single run still wins over the file.
+CHOREI_CONFIG="${CHOREI_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/chorei/config}"
+# shellcheck disable=SC1090
+[ -r "$CHOREI_CONFIG" ] && . "$CHOREI_CONFIG"
+
 # Workspace roots, colon-separated. Without configuration, the first of the usual
 # suspects that exists is used, so the tool works before it is configured.
 if [ -n "${STANDUP_WS:-}" ]; then

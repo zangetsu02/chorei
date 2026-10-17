@@ -1,0 +1,37 @@
+# chorei configuration. Copy it to ~/.config/chorei/config and edit.
+#
+#   mkdir -p ~/.config/chorei && cp config.example ~/.config/chorei/config
+#
+# Every line uses `: "${VAR:=value}"` rather than a plain assignment, so a
+# variable you set for one run on the command line still wins over this file.
+# Everything here is optional; delete the lines you do not need.
+
+# Where your repositories live. Several roots are separated by colons.
+# : "${STANDUP_WS:=$HOME/work:$HOME/oss}"
+
+# Which commits are yours. Defaults to git's user.email.
+# : "${STANDUP_GIT_AUTHOR:=you@example.com}"
+
+# Ticket prefixes, several separated by a pipe. Unset means no ticket keys.
+# : "${STANDUP_TICKET_PREFIX:=PROJ}"
+# : "${STANDUP_TICKET_PREFIX:=PROJ|OPS}"
+
+# Writing the stand-up to a file, and committing it if that directory is a git
+# repository. Each one takes ask, yes or no. Both default to ask.
+# : "${STANDUP_WRITE:=yes}"
+# : "${STANDUP_COMMIT:=yes}"
+# : "${STANDUP_DIR:=$HOME/notes/standup}"
+
+# Where your agent keeps its transcripts.
+# : "${STANDUP_PROJECTS:=$HOME/.claude/projects}"
+
+# How much of your prompts to show: lines before truncating, characters each.
+# : "${STANDUP_MAX_LINES:=60}"
+# : "${STANDUP_MAX_CHARS:=200}"
+
+# Jira. Without a base URL the ticket step is skipped. The password goes in the
+# keyring, never here:
+#   secret-tool store --label='Standup Jira' service standup-jira username <your-jira-username>
+# : "${STANDUP_JIRA_BASE:=https://jira.example.com}"
+# : "${STANDUP_JIRA_USER:=your-jira-username}"
+# : "${STANDUP_JIRA_DAYS:=2}"
