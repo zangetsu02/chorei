@@ -96,6 +96,9 @@ for repo in "${CHECKOUTS[@]}"; do
                "${until_arg[@]}" \
                --format='  commit %cd [%S] %s' --date=format:'%d/%m %H:%M' 2>/dev/null \
                | sed 's#refs/heads/##; s#refs/remotes/##' | sort -u)
+    # %S can resolve to origin/HEAD, which names no branch. Say what it points at.
+    head_target=$(git -C "$repo" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
+    [ -n "$head_target" ] && commits=$(printf '%s' "$commits" | sed "s#\[origin/HEAD\]#[$head_target]#")
   fi
 
   # Uncommitted work carries no date of its own, so it gets one here. Without it
@@ -137,7 +140,7 @@ for repo in "${CHECKOUTS[@]}"; do
   # progress touched inside it, or something still unpushed. A branch parked on a
   # ticket name since September is not activity, and neither is a file last
   # edited weeks ago; both go to the parked list instead of into the stand-up.
-  if [ -n "$commits" ] || [ "$wip_in_window" -eq 1 ] || [ -n "$ahead" ]; then
+  if [ -n "$commits" ] || [ "$wip_in_window" -eq 1 ]; then
     active=$((active+1))
     echo "## $name  [on branch: $branch]"
     [ -n "$commits" ] && echo "$commits"
@@ -150,9 +153,13 @@ for repo in "${CHECKOUTS[@]}"; do
     fi
     echo
     keys="$keys $(printf '%s\n%s\n' "$branch" "$commits" | extract_keys)"
-  elif [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ] || [ "${names_ticket:-0}" -gt 0 ]; then
+  elif [ -n "$ahead" ] || [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ] || [ "${names_ticket:-0}" -gt 0 ]; then
     reason=""
-    [ "${names_ticket:-0}" -gt 0 ] && reason="branch names a ticket"
+    [ -n "$ahead" ] && reason="unpushed, but nothing inside the window"
+    if [ "${names_ticket:-0}" -gt 0 ]; then
+      [ -n "$reason" ] && reason="$reason, "
+      reason="${reason}branch names a ticket"
+    fi
     if [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ]; then
       [ -n "$reason" ] && reason="$reason, "
       reason="${reason}${dirty:-0} modified and ${untracked:-0} untracked, newest change $wip_newest_h"

@@ -22,27 +22,26 @@ USERNAME="${STANDUP_JIRA_USER:-$USER}"
 DAYS="${STANDUP_JIRA_DAYS:-2}"
 SERVICE="${STANDUP_JIRA_KEYRING_SERVICE:-standup-jira}"
 
+# Never configured is a normal state, not a finding. It goes to stderr so it
+# stays out of the evidence the stand-up is read from.
 if [ -z "$BASE" ]; then
-  echo "JIRA: not configured - set STANDUP_JIRA_BASE (e.g. https://jira.example.com)."
-  echo "The standup continues without ticket status and titles."
+  echo "JIRA: not configured (set STANDUP_JIRA_BASE). Continuing without tickets." >&2
   exit 3
 fi
 
 for tool in curl jq secret-tool; do
   command -v "$tool" >/dev/null || {
-    echo "JIRA: $tool is not installed, skipping the ticket step."
+    echo "JIRA: $tool is not installed, skipping the ticket step." >&2
     exit 3
   }
 done
 
 PASS=$(secret-tool lookup service "$SERVICE" username "$USERNAME" 2>/dev/null)
 if [ -z "$PASS" ]; then
-  cat <<MSG
-JIRA: not configured - no password in the keyring.
-To enable it, run once:
+  cat >&2 <<MSG
+JIRA: no password in the keyring, continuing without tickets. To enable it:
   secret-tool store --label='Standup Jira' service $SERVICE username $USERNAME
 On Jira Cloud use an API token as the password.
-The standup continues without ticket status and titles.
 MSG
   exit 3
 fi
