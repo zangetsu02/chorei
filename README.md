@@ -1,36 +1,34 @@
 # chorei 朝礼
 
 *Chōrei* is the morning assembly a Japanese workplace opens the day with. This one
-assembles the evidence of yours — your git work, your coding-agent sessions, your
-tickets — so that every line you say to your team survives one question:
-*how do you know?*
+assembles the evidence of yours: your git work, your coding-agent sessions, your
+tickets, so that every line you say to your team survives one question, *how do you
+know?*
 
 Everything runs on your machine. Nothing is uploaded, no API key is needed, and the
-collectors make no network calls at all except the optional Jira one.
+collectors make no network calls except the optional Jira one.
 
-## Not another commit summarizer
+## What it adds to your commit log
 
-[`git-standup`](https://github.com/nilbuild/git-standup) shows you what you **committed**.
-`chorei` shows you everything your commits don't: the reviews, the analysis, the calls,
+[`git-standup`](https://github.com/nilbuild/git-standup) shows you what you committed.
+`chorei` also shows what the commits leave out: the reviews, the analysis, the calls,
 the message you drafted but have not sent, the work still uncommitted on a branch.
 
-And it does not write your stand-up for you. Tools that generate a paragraph from your
-commits exist, and nobody reads them aloud. `chorei` does the opposite: it puts the
-**evidence** in front of you, grouped by thread, each item carrying its source. The
-summary is yours to say, in your own words, in the ninety seconds you have.
+It stops at the evidence, grouped by thread, each item carrying its source. The summary
+is yours to say, in your own words, in the ninety seconds you have.
 
-What it refuses to do is the point:
+Most of its rules are about what it will not say:
 
 - a drafted message counts as *prepared*, never as *sent*
 - no number is computed, only quoted
 - an empty source is declared, never filled in with context
-- the window is the day before the stand-up, always — no "resume from last time"
+- the window is the day before the stand-up, recomputed from the calendar every time
 
 ## What it collects
 
 | Script | Source | What it gives you |
 |---|---|---|
-| `sessions.sh` | Claude Code transcripts | what *you* wrote, in the window — reviews, analysis and calls leave no commits |
+| `sessions.sh` | Claude Code transcripts | what *you* wrote, in the window; reviews, analysis and calls leave no commits |
 | `collect.sh` | every git checkout under your roots | your commits, work in progress, unpushed branches, ticket keys |
 | `tickets-jira.sh` | Jira (optional) | status and title of the tickets you touched |
 
@@ -45,14 +43,14 @@ git clone https://github.com/<you>/chorei ~/.claude/skills/standup
 ```
 
 The repository is `chorei`; the skill it installs is called `standup`, because that is
-the word you will type. Then just say *"I have standup soon"* and it runs — or call the
-scripts directly, they are plain bash and print to stdout.
+the word you will type. Then say *"I have standup soon"* and it runs. You can also call
+the scripts directly: they are plain bash and print to stdout.
 
 Requires `bash`, `git`, `jq`, and `curl` only if you use Jira.
 
 ## Configure
 
-Nothing is mandatory: without configuration it finds your repositories in the usual
+Nothing is mandatory. Without configuration it finds your repositories in the usual
 places and takes the git author from `git config user.email`.
 
 | Variable | Default | What it is |
@@ -90,18 +88,17 @@ Window: 2026-10-16 00:00 → 2026-10-17 00:00
 ```
 
 Four threads and 120 words is about forty-five seconds. The rest of your ninety is what
-you will do today and what is blocking you — and `chorei` deliberately says neither.
-Nothing in your git history knows what you have decided to do next, and whether
-something counts as a blocker is a judgement about who has to move. You say those two
-from your own head. This hands you the part that can be sourced.
+you will do today and what is blocking you, and `chorei` says neither: your git history
+does not know what you have decided to do next, and whether something counts as a
+blocker depends on who has to move.
 
-By default nothing is written anywhere: you are asked once, and nothing is ever
-committed or pushed unless you say so. If you keep your stand-ups in a git repository
-and want that automatic, set `STANDUP_WRITE=yes` and `STANDUP_COMMIT=yes`.
+By default nothing is written anywhere. You are asked once, and nothing is committed or
+pushed unless you say so. If you keep your stand-ups in a git repository and want that
+automatic, set `STANDUP_WRITE=yes` and `STANDUP_COMMIT=yes`.
 
-Keeping the files is worth something: `To check` carries your open commitments from one
-stand-up to the next, and it is read from yesterday's file. With `STANDUP_WRITE=no` that
-section is always empty.
+Keeping the files has one use: `To check` carries your open commitments from one
+stand-up to the next, and it reads them from yesterday's file. With `STANDUP_WRITE=no`
+that section is always empty.
 
 ## Licence
 
