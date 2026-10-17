@@ -84,14 +84,16 @@ trips the CAPTCHA on your account, so a 401 is terminal here: `chorei` never ret
 ```
 Window: 2026-10-16 00:00 → 2026-10-17 00:00
 
-## Done            max 4 bullets, one per thread
-## Today           max 3, proposed — you confirm them
-## Blockers        max 2, only what waits on someone else
-## To check        your open commitments from the previous stand-up
-## Provenance      one line per bullet: where it came from. Not read to the team.
+## Yesterday      prose, at most four threads, under 120 words
+## To check       your open commitments, still unanswered
+## Provenance     one line per claim: where it came from. Not read to the team.
 ```
 
-Sections 1-5 stay under 180 words, because ninety seconds is ninety seconds.
+Four threads and 120 words is about forty-five seconds. The rest of your ninety is what
+you will do today and what is blocking you — and `chorei` deliberately says neither.
+Nothing in your git history knows what you have decided to do next, and whether
+something counts as a blocker is a judgement about who has to move. You say those two
+from your own head. This hands you the part that can be sourced.
 
 By default nothing is written anywhere: you are asked once, and nothing is ever
 committed or pushed unless you say so. If you keep your stand-ups in a git repository

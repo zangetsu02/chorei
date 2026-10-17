@@ -70,22 +70,35 @@ tickets** and note it.
 1. `Window: YYYY-MM-DD 00:00 → YYYY-MM-DD 00:00` — the full day fixed in Step 0. It
    tells tomorrow's reader what was looked at; it is **not** an anchor for the next
    window, which is recomputed from the calendar
-2. `## Done` — max **4** bullets, one per thread, with the ticket key if there is one
-3. `## Today` — max **3** bullets, which you are *proposing*
-4. `## Blockers` — max **2** bullets: only what waits on others or stops them; if
-   nothing: "none"
-5. `## To check` — checkboxes of **their** commitments from the previous stand-up, not
-   yet closed. What depends on others goes under `Blockers`, not here: the difference
-   is who has to move. On the first run the previous file does not exist: write that,
+2. `## Yesterday` — **prose, not bullets**: a short paragraph, at most **four threads**,
+   under **120 words**. It is read aloud, so it has to sound like someone talking
+3. `## To check` — checkboxes of **their** open commitments, from the previous stand-up
+   and from this window. On the first run the previous file does not exist: write that,
    do not leave the section mute
-6. `## Provenance` — one line per bullet: the source (commit / their 09:36 sentence /
+4. `## Provenance` — one line per claim: the source (commit / their 09:36 sentence /
    Jira), plus notes about the tools (e.g. "tickets-jira.sh exited 3: statuses not
    verified") and the threads dropped. **Not** read to the team: it exists so they can
-   defend every bullet.
+   defend every sentence.
 
-**A bullet tells the outcome of a thread, not its aspects.** If a thread has commits,
-uncommitted work and a message ready, it stays one bullet: merge them. Splitting one
-thread into three bullets fills the cap with a single topic.
+**What this does not do.** It does not say what they will do today, and it does not list
+their blockers. Nothing in the data knows either: today is a decision, and a blocker is
+a judgement about who has to move. They say those two from their own head, in their own
+words. This tells them the one part that can be sourced — what actually happened.
+
+### Prose, with the discipline the bullets used to carry
+
+Prose is where this kind of tool usually goes soft, so the caps move rather than vanish:
+
+- **One sentence per thread.** If a thread has commits, uncommitted work and a drafted
+  message, it stays one sentence: join them. Three sentences about one topic eat the
+  whole paragraph.
+- **Four threads, 120 words, no exceptions.** That is about forty-five seconds, which
+  leaves room for the today and the blockers they say themselves.
+- **Name the thing, then what happened to it.** "Liste speciali: conflitti risolti e
+  allineato a develop" beats "Ho lavorato su liste speciali, dove c'erano dei conflitti".
+- **No linking waffle.** No "inoltre", "per quanto riguarda", "come anticipato". A
+  stand-up is a list spoken out loud, not an essay.
+- **The ticket key goes inline**, where it is said: `SNRC-1487 passa a READY TO QA`.
 
 **If there are more than four threads**, the priority order is: (1) what produced
 commits or was delivered to someone, (2) what is waiting on an answer from others,
@@ -97,16 +110,13 @@ may carry another job's key: if branch and account disagree, write theirs and no
 branch in Provenance.
 
 **What to drop from Jira:** the tickets the script adds because they are assigned and
-recently moved count only if a local source ties them to the window, or if they are
-blocked (→ blocker).
+recently moved count only if a local source ties them to the window.
 
 **Write in the language the user speaks to you in.** They will say this out loud to
 their own team; a stand-up translated into English is one they have to translate back
 while the meeting waits.
 
-Every bullet: **one line, max ~25 words**, plain language, no needless jargon.
-Sections 1-5 stay **under 180 words**, counting **only the bullet text** (headings and
-the `Window:` line excluded). Cutting is your job, not theirs.
+Cutting is your job, not theirs.
 
 ## Step 3 - Provenance: the rules that are not negotiable
 
@@ -120,8 +130,8 @@ the `Window:` line excluded). Cutting is your job, not theirs.
 - **A contradicted fact is dead.** If later in the same session a count was overturned,
   the last version holds; if the first one already circulated, say so.
 - **Workstation work stays out** (VMs, VPN, drivers, IDE, and the tools they build for
-  themselves), unless it blocked the work: then it is a blocker, one line. A block
-  already solved is not a blocker.
+  themselves), unless it stopped the work: then it is one clause inside the thread it
+  stopped. Something that got in the way and was solved is not worth a word.
 - **An empty source is declared.** "No commits yesterday" is a legitimate sentence to
   say at a stand-up. Filling the void with context is the worst thing you can do here.
 
@@ -142,19 +152,17 @@ the `Window:` line excluded). Cutting is your job, not theirs.
 
 - you are writing "I notified", "I sent", "I closed" without a confirmation
 - you are doing arithmetic
-- you are writing a bullet past a section's cap (4 / 3 / 2)
-- you are attributing to them a proposal you just formulated yourself
+- you are past four threads or 120 words
+- you are writing a second sentence about a thread you have already told
+- you are writing what they will do today, or calling something a blocker
 
-## Step 4 - Confirm before writing
+## Step 4 - Show the draft before writing
 
-`Today` and `Blockers` are the two sections the data does **not** contain. Present the
-draft, ask for confirmation or correction, and **only then** write the file.
+Everything in the output comes from a source, so there is nothing here for them to
+supply. Show the draft anyway and give them the chance to correct a fact or cut a
+thread: they were there, the sources were not.
 
-If the user is unreachable: hand over the draft and mark `Today` with `(unconfirmed)`.
-Whether the file is written then depends on Step 5: with `STANDUP_WRITE=yes` write it
-and say you did, with `ask` do **not** - you cannot ask someone who is not there, and
-silence is not a yes. Say instead that the file was not written and that tomorrow's
-window will have to be widened by hand, because the chain in Step 0 is broken without it.
+Then write it, according to Step 5.
 
 ## Step 5 - Write the file, if you are allowed to
 
