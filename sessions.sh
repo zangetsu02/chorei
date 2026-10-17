@@ -70,7 +70,11 @@ for f in "$PROJ"/*/*.jsonl; do
     # Drop the machine noise: command output, notifications, images, interruptions.
     # What is left is what you typed.
     | select($c | test("system-reminder|<command-name>|tool_use_id|Caveat:|\\[Request interrupted|<local-command-|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|^\\[Image #") | not)
-    | [$ep, ($ep|strflocaltime("%d/%m %H:%M")), ((.cwd // "?")|split("/")|last), ($c|gsub("\\s+";" ")|.[0:$maxchars])]
+    | ($c | gsub("\\s+";" ")) as $clean
+    # Two path segments, not one: a bare basename turns $HOME into "palladinic"
+    # and collapses every worktree of a repository onto the same label.
+    | ((.cwd // "?") | split("/") | if length > 1 then .[-2:] | join("/") else .[-1] end) as $where
+    | [$ep, ($ep|strflocaltime("%d/%m %H:%M")), $where, ($clean|.[0:$maxchars]), (($clean|length) - $maxchars)]
     | @tsv' "$f" 2>/dev/null >> "$tmp"
 done
 
@@ -80,7 +84,12 @@ if [ ! -s "$tmp" ]; then
   exit 0
 fi
 
-sort -n -u "$tmp" | cut -f2- | awk -F'\t' '{printf "%s [%s] %s\n", $1, $2, $3}' | head -n "$MAXLINES"
+# A cut prompt says so, with how much is missing: you cannot tell that a
+# truncated line was hiding a drafted message unless the gap is visible.
+sort -n -u "$tmp" | cut -f2- \
+  | awk -F'\t' '{ if ($4 > 0) printf "%s [%s] %s[...+%d chars]\n", $1, $2, $3, $4;
+                  else printf "%s [%s] %s\n", $1, $2, $3 }' \
+  | head -n "$MAXLINES"
 
 lines=$(sort -n -u "$tmp" | wc -l)
 if [ "$lines" -gt "$MAXLINES" ]; then

@@ -41,7 +41,12 @@ fi
 # number in every branch name, which is worse than extracting nothing.
 PREFIX="${STANDUP_TICKET_PREFIX:-}"
 SINCE="${1:-yesterday 00:00}"
-UNTIL="${2:-}"   # exclusive: a standup tells a closed day, not "up to now"
+UNTIL="${2:-}"   # exclusive when given: the window the caller asked for
+
+if ! SINCE_TS=$(date -d "$SINCE" +%s 2>/dev/null); then
+  echo "ERROR: cannot parse date: $SINCE" >&2
+  exit 2
+fi
 
 echo "# git collection - roots: $ROOTS"
 if [ -n "$UNTIL" ]; then
@@ -61,7 +66,7 @@ for root in "${root_list[@]}"; do
 done
 
 declare -A seen_commits      # one repository shared by several worktrees has the same commits
-total=0; active=0; keys=""
+total=0; active=0; keys=""; parked=""
 
 extract_keys() {
   [ -z "$PREFIX" ] && { cat >/dev/null; return; }
@@ -93,8 +98,28 @@ for repo in "${CHECKOUTS[@]}"; do
                | sed 's#refs/heads/##; s#refs/remotes/##' | sort -u)
   fi
 
-  dirty=$(git -C "$repo" status --porcelain 2>/dev/null | grep -cv '^??')
-  untracked=$(git -C "$repo" status --porcelain 2>/dev/null | grep -c '^??')
+  # Uncommitted work carries no date of its own, so it gets one here. Without it
+  # a file last touched in September prints under a heading that announces a
+  # window, and the stand-up inherits a claim nobody checked.
+  status=$(git -C "$repo" status --porcelain 2>/dev/null)
+  dirty=$(printf '%s' "$status" | grep -cv '^??' || true)
+  untracked=$(printf '%s' "$status" | grep -c '^??' || true)
+  [ -z "$status" ] && { dirty=0; untracked=0; }
+
+  wip_newest=0; wip_newest_h=""
+  if [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ]; then
+    while IFS= read -r entry; do
+      [ -z "$entry" ] && continue
+      path=${entry:3}
+      path=${path##* -> }          # renames print "old -> new"
+      path=${path%\"}; path=${path#\"}
+      ts=$(stat -c %Y "$repo/$path" 2>/dev/null) || continue
+      [ "$ts" -gt "$wip_newest" ] && wip_newest=$ts
+    done <<< "$status"
+    [ "$wip_newest" -gt 0 ] && wip_newest_h=$(date -d "@$wip_newest" '+%d/%m %H:%M')
+  fi
+  wip_in_window=0
+  [ "$wip_newest" -ge "$SINCE_TS" ] && wip_in_window=1
 
   upstream=$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)
   ahead=""
@@ -105,31 +130,51 @@ for repo in "${CHECKOUTS[@]}"; do
     ahead="  unpushed: branch '$branch' has no upstream (never pushed?)"
   fi
 
-  # A checkout is interesting if it has your commits, work in progress (even only new
-  # files), something unpushed, or a branch naming a ticket: a worktree holding only
-  # untracked files is still open work and belongs in the standup.
   names_ticket=0
   [ -n "$PREFIX" ] && names_ticket=$(printf '%s' "$branch" | grep -ciE "(${PREFIX})[ _-]?[0-9]{1,6}")
-  if [ -n "$commits" ] || [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ] \
-     || [ -n "$ahead" ] || [ "${names_ticket:-0}" -gt 0 ]; then
+
+  # Activity means something happened inside the window: a commit, work in
+  # progress touched inside it, or something still unpushed. A branch parked on a
+  # ticket name since September is not activity, and neither is a file last
+  # edited weeks ago; both go to the parked list instead of into the stand-up.
+  if [ -n "$commits" ] || [ "$wip_in_window" -eq 1 ] || [ -n "$ahead" ]; then
     active=$((active+1))
     echo "## $name  [on branch: $branch]"
     [ -n "$commits" ] && echo "$commits"
     [ -n "$ahead" ] && echo "$ahead"
     if [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ]; then
-      echo "  work-in-progress: ${dirty:-0} modified, ${untracked:-0} untracked"
-      git -C "$repo" status --porcelain 2>/dev/null | grep -v '^??' | head -5 \
-        | sed 's/^/    touched: /'
+      wip_note=""
+      [ "$wip_in_window" -eq 0 ] && wip_note=" (before the window: not part of this day)"
+      echo "  work-in-progress: ${dirty:-0} modified, ${untracked:-0} untracked, newest change ${wip_newest_h}${wip_note}"
+      printf '%s' "$status" | grep -v '^??' | head -5 | sed 's/^/    touched: /'
     fi
     echo
     keys="$keys $(printf '%s\n%s\n' "$branch" "$commits" | extract_keys)"
+  elif [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ] || [ "${names_ticket:-0}" -gt 0 ]; then
+    reason=""
+    [ "${names_ticket:-0}" -gt 0 ] && reason="branch names a ticket"
+    if [ "${dirty:-0}" -gt 0 ] || [ "${untracked:-0}" -gt 0 ]; then
+      [ -n "$reason" ] && reason="$reason, "
+      reason="${reason}${dirty:-0} modified and ${untracked:-0} untracked, newest change $wip_newest_h"
+    fi
+    parked="$parked  $name  [$branch]  $reason"$'\n'
   fi
 done
+
+if [ -n "$parked" ]; then
+  echo "## parked, nothing inside the window"
+  echo "# Listed so you know they exist. None of this belongs in the stand-up:"
+  echo "# the branch is just where the repository was left, and the uncommitted"
+  echo "# files were last touched before the window opened."
+  printf '%s' "$parked"
+  echo
+fi
 
 if [ -n "$PREFIX" ]; then
   echo "## ticket keys found (prefix: $PREFIX)"
   ck=$(printf '%s' "$keys" | tr ' ' '\n' | grep -E '^[A-Z]+-[0-9]+$' | sort -u | tr '\n' ' ')
-  if [ -n "$ck" ]; then echo "$ck"; else echo "(none: no branch or message names a $PREFIX ticket)"; fi
+  echo "# from the active checkouts only; a parked branch naming a ticket is not work."
+  if [ -n "$ck" ]; then echo "$ck"; else echo "(none inside the window)"; fi
 else
   echo "## ticket keys: disabled (set STANDUP_TICKET_PREFIX, e.g. PROJ or 'PROJ|OPS')"
 fi
