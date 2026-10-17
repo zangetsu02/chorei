@@ -103,7 +103,7 @@ Prose is where this kind of tool usually goes soft, so the caps move rather than
   does not deserve a sentence.
 - **No linking waffle.** No "besides", "regarding", "as mentioned". A stand-up is a list
   spoken out loud, not an essay.
-- **The ticket key goes inline**, where it is said: `SNRC-1487 passa a READY TO QA`.
+- **The ticket key goes inline**, where it is said: `PROJ-1487 moved to READY TO QA`.
 
 **If there are more than four threads**, the priority order is: (1) what produced
 commits or was delivered to someone, (2) what is waiting on an answer from others,
