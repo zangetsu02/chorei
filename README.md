@@ -16,6 +16,10 @@ know?*
 Everything runs on your machine. Nothing is uploaded, no API key is needed, and the
 collectors make no network calls except the optional Jira one.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="chorei assembling a stand-up: the collectors run, then the stand-up appears with the drafted email marked as not sent" width="760">
+</p>
+
 ## What it adds to your commit log
 
 [`git-standup`](https://github.com/nilbuild/git-standup) shows you what you committed.
