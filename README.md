@@ -48,21 +48,30 @@ All three are read-only. `collect.sh` never fetches, pulls or checks anything ou
 
 ## Install
 
-As a Claude Code skill:
+As a Claude Code plugin:
+
+```
+/plugin marketplace add zangetsu02/chorei
+/plugin install chorei@chorei
+```
+
+With the skills CLI, for any agent it supports:
 
 ```sh
 npx skills add zangetsu02/chorei
 ```
 
-or, to clone it yourself:
+Or clone it and point your agent's skills directory at it:
 
 ```sh
-git clone https://github.com/zangetsu02/chorei ~/.claude/skills/standup
+git clone https://github.com/zangetsu02/chorei
+ln -s "$PWD/chorei/skills/standup" ~/.claude/skills/standup
 ```
 
 The repository is `chorei`; the skill it installs is called `standup`, because that is
 the word you will type. Then say *"I have standup soon"* and it runs. You can also call
-the scripts directly: they are plain bash and print to stdout.
+the three scripts in `skills/standup/` directly: they are plain bash and print to
+stdout.
 
 Requires `bash`, `git`, `jq`, and `curl` only if you use Jira.
 

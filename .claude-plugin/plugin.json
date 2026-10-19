@@ -1,0 +1,9 @@
+{
+  "name": "chorei",
+  "version": "0.1.0",
+  "description": "Prepares your daily stand-up from one day of git history, your coding-agent sessions and your tickets. It hands back the evidence, grouped by thread, with every line carrying its source. Everything runs locally.",
+  "author": {
+    "name": "Christian Palladini",
+    "url": "https://github.com/zangetsu02"
+  }
+}

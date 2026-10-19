@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "chorei",
+  "description": "Assembles your daily stand-up from one day of git history, coding-agent sessions and tickets, with every line carrying its source.",
+  "owner": {
+    "name": "Christian Palladini",
+    "url": "https://github.com/zangetsu02"
+  },
+  "plugins": [
+    {
+      "name": "chorei",
+      "description": "A stand-up you can defend: it collects the evidence and refuses to claim what no source shows.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
