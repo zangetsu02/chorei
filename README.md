@@ -48,13 +48,6 @@ All three are read-only. `collect.sh` never fetches, pulls or checks anything ou
 
 ## Install
 
-As a Claude Code plugin:
-
-```
-/plugin marketplace add zangetsu02/chorei
-/plugin install chorei@chorei
-```
-
 With the skills CLI, for any agent it supports:
 
 ```sh
